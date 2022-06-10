@@ -20,17 +20,17 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgcodecs.Imgcodecs;
 
 public class CamCap extends javax.swing.JFrame {
-
+    
     private DaemonThread myThread = null;
     int count = 0;
-
+    
     Mat frame = new Mat();
     Mat area;
     Mat cara;
     Mat circulos = new Mat();
-
+    
     MatOfByte mem = new MatOfByte();
-
+    
     CascadeClassifier faceDetector;  // Objeto reconocedor de imagenes
     CascadeClassifier eyeDetector;   // Objeto para reconocer ojos
 
@@ -43,25 +43,25 @@ public class CamCap extends javax.swing.JFrame {
     String eyeFile = "haarcascade_eye.xml";  // Archivo referencia para reconocimiento de rostros
 
     class DaemonThread implements Runnable {
-
+        
         protected volatile boolean runnable = false;
         VideoCapture webSource = null;
         String source = "";
-
+        
         DaemonThread(String _source) {
             source = _source;
         }
-
+        
         @Override
         public void run() {
             webSource = new VideoCapture();
-
+            
             if (source.equals("Desde WebCam")) {
                 webSource.open(0);
             } else {
                 webSource.open(File_path);
             }
-
+            
             faceDetector = new CascadeClassifier(base_path + faceFile); // Se crea un objeto CascadeClassifier que reconocera caras
             faceDetections = new MatOfRect(); // Se inicializa el objeto donde se guardaran las caras detectadas
 
@@ -77,33 +77,33 @@ public class CamCap extends javax.swing.JFrame {
                             faceDetector.detectMultiScale(frame, faceDetections); // Se buscan las caras dentro de la imagen y se guardan en faceDetections
 
                             int i = 0;
-
+                            
                             for (Rect rect : faceDetections.toArray()) {
 
                                 // Se crea un cuadrito verde por cada cara detectada
                                 Imgproc.rectangle(frame, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height),
                                         new Scalar(0, 255, 0));
-
+                                
                                 cara = frame.submat(faceDetections.toArray()[i]);
-
+                                
                                 eyeDetector.detectMultiScale(cara, eyeDetections);
-
+                                
                                 if (eyeDetections.toArray().length != 0) {
-
+                                    
                                     System.out.println("Cara con " + eyeDetections.toArray().length + " ojos");
-
+                                    
                                     for (int j = 0; j < eyeDetections.toArray().length; j++) {
-
+                                        
                                         Rect rect2 = eyeDetections.toArray()[j];
-
+                                        
                                         Imgproc.rectangle(frame, new Point(rect2.x, rect2.y), new Point(rect2.x + rect2.width, rect2.y + rect2.height),
                                                 new Scalar(0, 255, 0));
-
+                                        
                                         Mat eye = cara.submat(eyeDetections.toArray()[j]);
-
+                                        
                                     }
                                 }
-
+                                
                             }
 
                             // Se codifica la imagen frame a un arreglo de memoria
@@ -115,7 +115,7 @@ public class CamCap extends javax.swing.JFrame {
                             // Se despliega en el Panel
                             BufferedImage buff = (BufferedImage) im;
                             Graphics g = jPanel1.getGraphics();
-
+                            
                             if (g.drawImage(buff, 0, 0, getWidth(), getHeight() - 150, 0, 0, buff.getWidth(), buff.getHeight(), null)) {
                                 if (runnable == false) {
                                     System.out.println("En metodo wait()");
@@ -128,11 +128,11 @@ public class CamCap extends javax.swing.JFrame {
                     }
                 }
             }
-
+            
             webSource.release();
         }
     }
-
+    
     public CamCap() {
         initComponents();
     }
@@ -151,6 +151,7 @@ public class CamCap extends javax.swing.JFrame {
         jComboBox1 = new javax.swing.JComboBox();
         jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Captura de Video");
@@ -165,7 +166,7 @@ public class CamCap extends javax.swing.JFrame {
             }
         });
 
-        jButton1.setFont(new java.awt.Font("Cambria", 0, 18)); // NOI18N
+        jButton1.setFont(new java.awt.Font("Quicksand", 1, 14)); // NOI18N
         jButton1.setText("Iniciar");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -173,9 +174,12 @@ public class CamCap extends javax.swing.JFrame {
             }
         });
 
-        jButton2.setFont(new java.awt.Font("Cambria", 0, 18)); // NOI18N
+        jButton2.setFont(new java.awt.Font("Quicksand", 1, 14)); // NOI18N
         jButton2.setText("Detener");
         jButton2.setEnabled(false);
+        jButton2.setMaximumSize(new java.awt.Dimension(72, 24));
+        jButton2.setMinimumSize(new java.awt.Dimension(72, 24));
+        jButton2.setPreferredSize(new java.awt.Dimension(72, 24));
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -193,14 +197,14 @@ public class CamCap extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 369, Short.MAX_VALUE)
+            .addGap(0, 377, Short.MAX_VALUE)
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel2.setAlignmentX(0.1F);
         jPanel2.setAlignmentY(0.1F);
 
-        jComboBox1.setFont(new java.awt.Font("Calibri", 0, 16)); // NOI18N
+        jComboBox1.setFont(new java.awt.Font("Quicksand", 0, 12)); // NOI18N
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Desde WebCam", "Desde Archivo" }));
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -208,7 +212,7 @@ public class CamCap extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setFont(new java.awt.Font("Calibri", 0, 18)); // NOI18N
+        jButton3.setFont(new java.awt.Font("Quicksand", 1, 14)); // NOI18N
         jButton3.setText("...");
         jButton3.setEnabled(false);
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -217,17 +221,17 @@ public class CamCap extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Calibri", 0, 16)); // NOI18N
-        jLabel1.setText("Metodo de Captura");
+        jLabel1.setFont(new java.awt.Font("Quicksand", 1, 14)); // NOI18N
+        jLabel1.setText("Método de Captura");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(356, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -235,14 +239,23 @@ public class CamCap extends javax.swing.JFrame {
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3))
-                .addContainerGap(14, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(8, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(jButton3)))
+                .addGap(14, 14, 14))
         );
+
+        jButton4.setFont(new java.awt.Font("Quicksand", 1, 14)); // NOI18N
+        jButton4.setText("Salir");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -252,11 +265,13 @@ public class CamCap extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 763, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(321, 321, 321)
+                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 789, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -265,11 +280,12 @@ public class CamCap extends javax.swing.JFrame {
                 .addGap(6, 6, 6)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -277,15 +293,15 @@ public class CamCap extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-
+        
         if ((jButton1.getText()).equals("Iniciar")) {
-
+            
             myThread = new DaemonThread(jComboBox1.getSelectedItem().toString());
             Thread t = new Thread(myThread);
             t.setDaemon(true);
             myThread.runnable = true;
             t.start();
-
+            
             jButton1.setEnabled(false);
             jButton2.setEnabled(true);
             jComboBox1.setEnabled(false);
@@ -293,7 +309,7 @@ public class CamCap extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-
+        
         if ((jButton2.getText()).equals("Detener")) {
             myThread.runnable = false;
             jButton2.setEnabled(false);
@@ -341,6 +357,10 @@ public class CamCap extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_formWindowClosing
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -358,6 +378,7 @@ public class CamCap extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
