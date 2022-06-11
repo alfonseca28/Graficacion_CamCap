@@ -1,4 +1,10 @@
 
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -15,58 +21,60 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgcodecs.Imgcodecs;
 
 public class CamCap extends javax.swing.JFrame {
-    
+
     private DaemonThread myThread = null;
     int count = 0;
-    
+
     Mat frame = new Mat();
     Mat area;
-    Mat cara;
+    Mat halo;
     Mat circulos = new Mat();
-    
+
     MatOfByte mem = new MatOfByte();
-    
-    CascadeClassifier faceDetector;  // Objeto reconocedor de imagenes
+
+    CascadeClassifier haloDetector;  // Objeto reconocedor de imagenes
     CascadeClassifier eyeDetector;   // Objeto para reconocer ojos
 
-    MatOfRect faceDetections;   // Matriz donde se alojarán las caras detectadas
+    MatOfRect haloDetections;   // Matriz donde se alojarán las caras detectadas
     MatOfRect eyeDetections;   // Matriz donde se alojarán los ojos detectadas
 
     String File_path = "";
     String base_path = "./data/haarcascades/";   // Carpeta donde se localizan los modelos de reconocimiento
-    String faceFile = "haarcascade_frontalface_alt.xml";  // Archivo referencia para reconocimiento de rostros
+    String haloFile = "haarcascade_halo.xml";  // Archivo referencia para reconocimiento de rostros
     String eyeFile = "haarcascade_eye.xml";  // Archivo referencia para reconocimiento de rostros
 
     class DaemonThread implements Runnable {
-        
+
         protected volatile boolean runnable = false;
         VideoCapture webSource = null;
         String source = "";
-        
+
         DaemonThread(String _source) {
             source = _source;
         }
-        
+
         @Override
         public void run() {
             webSource = new VideoCapture();
-            
+
             if (source.equals("Desde WebCam")) {
                 webSource.open(0);
             } else {
                 webSource.open(File_path);
             }
-            
-            faceDetector = new CascadeClassifier(base_path + faceFile); // Se crea un objeto CascadeClassifier que reconocera caras
-            faceDetections = new MatOfRect(); // Se inicializa el objeto donde se guardaran las caras detectadas
+
+            haloDetector = new CascadeClassifier(base_path + haloFile); // Se crea un objeto CascadeClassifier que reconocera caras
+            haloDetections = new MatOfRect(); // Se inicializa el objeto donde se guardaran las caras detectadas
 
             eyeDetector = new CascadeClassifier(base_path + eyeFile); // Se crea un objeto CascadeClassifier que reconocera caras
             eyeDetections = new MatOfRect(); // Se inicializa el objeto donde se guardaran las caras detectadas
+            Size a = new Size(35.0, 35.0);
 
             synchronized (this) {
                 while (runnable) {
@@ -74,36 +82,35 @@ public class CamCap extends javax.swing.JFrame {
                         try {
                             webSource.retrieve(frame); // Se obtiene un recuadro de la camara
 
-                            faceDetector.detectMultiScale(frame, faceDetections); // Se buscan las caras dentro de la imagen y se guardan en faceDetections
+                            haloDetector.detectMultiScale(frame, haloDetections, 8.5, 30, 1, a); // Se buscan las caras dentro de la imagen y se guardan en haloDetections
 
                             int i = 0;
-                            
-                            for (Rect rect : faceDetections.toArray()) {
 
-                                // Se crea un cuadrito verde por cada cara detectada
+                            for (Rect rect : haloDetections.toArray()) {
+
+                                // Se crea un cuadrito verde por cada control detectada
                                 Imgproc.rectangle(frame, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height),
-                                        new Scalar(0, 255, 0));
-                                
-                                cara = frame.submat(faceDetections.toArray()[i]);
-                                
-                                eyeDetector.detectMultiScale(cara, eyeDetections);
-                                
+                                        new Scalar(0, 250, 0));
+
+                                halo = frame.submat(haloDetections.toArray()[i]);
+
+                                /* eyeDetector.detectMultiScale(control, eyeDetections);
+
                                 if (eyeDetections.toArray().length != 0) {
-                                    
+
                                     System.out.println("Cara con " + eyeDetections.toArray().length + " ojos");
-                                    
+
                                     for (int j = 0; j < eyeDetections.toArray().length; j++) {
                                         
                                         Rect rect2 = eyeDetections.toArray()[j];
-                                        
+
                                         Imgproc.rectangle(frame, new Point(rect2.x, rect2.y), new Point(rect2.x + rect2.width, rect2.y + rect2.height),
-                                                new Scalar(0, 255, 0));
+                                        new Scalar(0, 255, 0));
                                         
-                                        Mat eye = cara.submat(eyeDetections.toArray()[j]);
-                                        
+                                        Mat eye = control.submat(eyeDetections.toArray()[j]);
+
                                     }
-                                }
-                                
+                                }*/
                             }
 
                             // Se codifica la imagen frame a un arreglo de memoria
@@ -115,7 +122,7 @@ public class CamCap extends javax.swing.JFrame {
                             // Se despliega en el Panel
                             BufferedImage buff = (BufferedImage) im;
                             Graphics g = jPanel1.getGraphics();
-                            
+
                             if (g.drawImage(buff, 0, 0, getWidth(), getHeight() - 150, 0, 0, buff.getWidth(), buff.getHeight(), null)) {
                                 if (runnable == false) {
                                     System.out.println("En metodo wait()");
@@ -128,11 +135,11 @@ public class CamCap extends javax.swing.JFrame {
                     }
                 }
             }
-            
+
             webSource.release();
         }
     }
-    
+
     public CamCap() {
         initComponents();
     }
@@ -293,15 +300,15 @@ public class CamCap extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
+
         if ((jButton1.getText()).equals("Iniciar")) {
-            
+
             myThread = new DaemonThread(jComboBox1.getSelectedItem().toString());
             Thread t = new Thread(myThread);
             t.setDaemon(true);
             myThread.runnable = true;
             t.start();
-            
+
             jButton1.setEnabled(false);
             jButton2.setEnabled(true);
             jComboBox1.setEnabled(false);
@@ -309,7 +316,7 @@ public class CamCap extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        
+
         if ((jButton2.getText()).equals("Detener")) {
             myThread.runnable = false;
             jButton2.setEnabled(false);
